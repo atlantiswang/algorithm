@@ -3,37 +3,29 @@
 #include <stdio.h>
 #include <time.h>
 
-/*
-*	if the mem is a pointer to a object and the object is created in heap.
+typedef struct tag_node
+{
+	int mem;
+	struct tag_node *next;
+}NODE, *PNODE;
 
-*	the node_st should have a destruct function to release the heap memory
-
-*	if the type defined in class ,we can use it by added "classname::".
-
-*	by addition , the type should have a public property.
-*/
-
-class mylist
+class linkedlist
 {
 public:
-	typedef struct node_st
-	{
-		int mem;
-		struct node_st *next;
-	}NODE, *PNODE;
 
-public:
-
-	mylist(PNODE phead = NULL) :
+	linkedlist(PNODE phead = NULL) :
 		m_phead(phead) {}
-	void add(int num);
+	void insert(int num);
+	//del需要拆分
 	void del(int num);
 	void free();
 	void print();
+	NODE *search(int key);
+	void delnode(NODE* p);
 	//reserse
 	NODE *reverse(NODE *p);
 	NODE *get() { return m_phead; }
-	~mylist()
+	~linkedlist()
 	{
 		free();
 	}
@@ -42,7 +34,29 @@ private:
 
 };
 
-void mylist::print()
+NODE *linkedlist::search(int key)
+{
+	for (NODE *p = m_phead; p; p = p->next)
+		if (p->mem == key)
+			return p;
+	return NULL;
+}
+
+void linkedlist::delnode(NODE* p)
+{
+	NODE ** pnext;
+	for (pnext = &m_phead; *pnext; pnext = &(*pnext)->next)
+	{
+		if (*pnext == p)
+		{
+			*pnext = p->next;
+			delete p;
+			break;
+		}
+	}
+}
+
+void linkedlist::print()
 {
 	if (!m_phead)
 	{
@@ -56,36 +70,16 @@ void mylist::print()
 
 }
 
-void mylist::del(int num)
+void linkedlist::del(int num)
 {
-	if (!m_phead) return;
-
-	PNODE pnode_p = m_phead;
-	PNODE pnode_temp = m_phead->next;
-
-	while (pnode_temp)
+	NODE* p = NULL;
+	while (p = search(num))
 	{
-		PNODE pnode_t = pnode_temp->next;
-		if (pnode_temp->mem == num)
-		{
-			delete pnode_temp;
-			pnode_temp = pnode_t;
-			pnode_p->next = pnode_t;
-			continue;
-		}
-		pnode_temp = pnode_temp->next;
-		pnode_p = pnode_p->next;
-	}
-
-	if (m_phead->mem == num)
-	{
-		pnode_temp = m_phead->next;
-		delete m_phead;
-		m_phead = pnode_temp;
+		delnode(p);
 	}
 }
 
-void mylist::add(int num)
+void linkedlist::insert(int num)
 {
 	PNODE pnode_temp = m_phead;
 	PNODE pnode_p = NULL;
@@ -106,7 +100,7 @@ void mylist::add(int num)
 	pnode_p->next = pnode_temp;
 }
 
-void mylist::free()
+void linkedlist::free()
 {
 	PNODE pnode_d = m_phead;
 	while (pnode_d)
@@ -118,7 +112,7 @@ void mylist::free()
 	m_phead = NULL;
 }
 
-mylist::NODE *mylist::reverse(NODE* p)
+NODE *linkedlist::reverse(NODE* p)
 {
 	if (p == NULL || p->next == NULL)
 		return p;
@@ -132,12 +126,12 @@ mylist::NODE *mylist::reverse(NODE* p)
 void test()
 {
 	int num;
-	mylist list;
+	linkedlist list;
 	srand(time(NULL));
 	for (int i = 0; i < 5; i++)
 	{
 		num = rand() % 10;
-		list.add(num);
+		list.insert(num);
 		printf("%d ", num);
 	}
 	puts("\n------------------------");
