@@ -24,6 +24,10 @@ public:
 	void delnode(NODE* p);
 	//reserse
 	NODE *reverse(NODE *p);
+	//其它方法逆序
+	NODE *reverse_(NODE *p);
+	//暂时使用选择排序
+	NODE *sort();
 	NODE *get() { return m_phead; }
 	~linkedlist()
 	{
@@ -123,6 +127,61 @@ NODE *linkedlist::reverse(NODE* p)
 	return newHead;
 }
 
+NODE *linkedlist::reverse_(NODE* p)
+{
+	//需要判断一下是否为空指针
+	if (p == NULL)
+		return m_phead;
+	//三个节点指针 p1 p2 p3(放在while中)，p1 p2 依次前两个节点
+	NODE *p1 = p;
+	NODE *p2 = p1->next;
+	//第1个节点的next提前赋值
+	p1->next = NULL;
+	//只需要判断p2来决定是否完成
+	while (p2)
+	{
+		//保存一下p2->next为后面p2的赋值做准备
+		NODE *p3 = p2->next;
+		//关键代码，将节点的指向逆向
+		p2->next = p1;
+		//在下一次循环之前要将p1,p2后移一个节点
+		p1 = p2;
+		p2 = p3;
+	}
+	//循环结束后p1的指向就是链表头
+	m_phead = p1;
+	return m_phead;
+}
+
+NODE *linkedlist::sort()
+{
+	NODE *p = m_phead;
+	if (p == NULL)
+		return m_phead;
+
+	while (p)
+	{
+		NODE *pMix = p;
+		NODE *p1 = pMix->next;
+		while (p1)
+		{
+			if (pMix->mem > p1->mem)
+			{
+				pMix = p1;
+			}
+			p1 = p1->next;
+		}
+		if (pMix != p)
+		{
+			int mem = p->mem;
+			p->mem = pMix->mem;
+			pMix->mem = mem;
+		}		
+		p = p->next;
+	}
+	return m_phead;
+}
+
 void test()
 {
 	int num;
@@ -138,6 +197,8 @@ void test()
 	list.print();
 	puts("\n------------------------reverse:");
 	list.reverse(list.get());
+	list.reverse_(list.get());
+	list.sort();
 	list.print();
 	puts("please input num to delete:");
 	std::cin >> num;
